@@ -3,30 +3,36 @@
 # Extract sign -- done
     # Thresholding
     # Morphological Transformation 
+# Rotation -- done
 # # Normalization(we normalize each image by dividing
 # the pixel values with the standard deviation of the pixel
 # values of the images in a dataset.)
 # Resizing
-# Rotation and crop
+
 
 
 import cv2
+import math
 import numpy as np
 from scipy import ndimage
 
 
 image = cv2.imread('cedar_dataset/full_forg/forgeries_2_4.png',cv2.IMREAD_GRAYSCALE)
-image = cv2.imread('cedar_dataset/full_org/original_8_4.png',cv2.IMREAD_GRAYSCALE)
-image = cv2.imread('cedar_dataset/full_forg/forgeries_1_14.png',cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('cedar_dataset/full_org/original_7_17.png',cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('cedar_dataset/full_org/original_22_16.png',cv2.IMREAD_GRAYSCALE)
 
 image = cv2.imread('my_sig.jpg',cv2.IMREAD_GRAYSCALE)
 image = cv2.imread('rotated.png',cv2.IMREAD_GRAYSCALE)
 
 
 
+#rotation angle in degree
+
+           
 
 res = preprocess(image)
 cv2.imshow('r',res)
+
 
 
 def preprocess(image):
@@ -34,7 +40,17 @@ def preprocess(image):
     roi = extract_signature(clean)
     th,res= cv2.threshold(roi, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
+    # r = ndimage.rotate(res, -(90-math.degrees(math.atan(res.shape[1]/res.shape[0]))))
+    angle = 90-math.degrees(math.atan(res.shape[1]/res.shape[0]))
+    if angle > 20:
+        res = rotate_image(res, -(angle if angle>20 else 0))
+   
     return res
+
+def rotate_image(image, angle):
+  rot_mat = cv2.getRotationMatrix2D((image.shape[0]/2+40,image.shape[1]/2+40), angle, 1.0)
+  result = cv2.warpAffine(image, rot_mat, (int(math.sqrt(image.shape[0]*image.shape[0]+image.shape[1]*image.shape[1])),int(image.shape[1])), flags=cv2.INTER_LINEAR,borderValue=(255,255,255))
+  return result
 
 
 
